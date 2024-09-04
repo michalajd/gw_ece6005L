@@ -13,20 +13,90 @@ Main:			; label indicating start of program, instruction address 0x0000
 	sd r3,C(r0)	; store r3 to memory address C + r0
 	halt		; end program
 
-
+----------------------------------------------------------------------------------------------
 Practice Problem 1 (A+B+5, A=B=2)
 .data
 A: .word32 2		; create a 32-bit word with value 2
 B: .word32 2		; create a 32-bit word with value 2
+C: .word32 0		; create a 32-bit word with value 0...FOR STORING!
 
 .text			; start of code segment
 Main:			; label indicating start of program, instruction address 0x0000
 	ld r4,A(r0)	; load value in address A + r0 to register r4
 	ld r5,B(r0)	; load value in address B + r0 to register r5
 	dadd r3,r4,r5	; add r4 and r5, store in r3
-	dadd r2,r3,5	; add r3 and 5, store in r2
+	daddi r2,r3,5	; add r3 and 5, store in r2
 	sd r2,C(r0)	; store r3 to memory address C + r0
 	halt		; end program
+
+----------------------------------------------------------------------------------------------
+Practice Problem 2 (A^2 + 2*B + 10, A=B=2)
+.data
+A: .word32 2		; create a 32-bit word with value 2
+B: .word32 2		; create a 32-bit word with value 2
+C: .word32 0		; create a 32-bit word with value 0...FOR STORING!
+D: .word32 2		; create a 32-bit word with value 2. this is the workaround for li
+
+.text			; start of code segment
+Main:			; label indicating start of program, instruction address 0x0000
+	ld r4,A(r0)	; load value in address A + r0 to register r4
+	ld r5,B(r0)	; load value in address B + r0 to register r5
+	dmulu r3,r4,r4	; multiply r4 and r4 (r4 squared), store in r3
+	ld r8,D(r0)	; load 2 into a temp register
+	dmulu r9,r5,r8	; multiply r5 and r8, store in r2
+	dadd r10,r3,r9	; add r3 and r2, store in r3
+	daddi r2,r10,10	; add r3 and 10, store in r2
+	sd r2,C(r0)	; store r3 to memory address C + r0
+	halt		; end program
+
+----------------------------------------------------------------------------------------------
+Practice Problem 3 (while loop, add 1 to 101)
+.data
+s: .word32 0		; create a 32-bit word with value 0 (s)
+i: .word32 1		; create a 32-bit word with value 1 (i)
+N: .word32 101		; create a 32-bit word with value 101 (N, top value)
+D: .word32 0		; create a 32-bit word with value 0...FOR STORING!
+
+.text			; start of code segment
+Main:			; label indicating start of program, instruction address 0x0000
+	ld r4,s(r0)	; load value s into r4
+	ld r5,i(r0)	; load value i into r5
+	ld r6,N(r0)	; load upper bound N into r6
+
+Loop:
+	daddi r4,r4,1	; increment s by 1
+	daddi r5,r5,1	; increment i by 1
+	beq r5,r6,End	; branch if i = N
+	bne r5,r6,Loop	; loop again if i != N
+
+End:
+	sd r4,D(r0)	; store r2 to memory address D + r0
+	halt		; end program 
+
+----------------------------------------------------------------------------------------------
+Practice Problem 4 (add first 100 natural numbers)
+.data
+s: .word32 0		; create a 32-bit word with value 0 (s)
+i: .word32 1		; create a 32-bit word with value 1 (i)
+N: .word32 101		; create a 32-bit word with value 101 (N, top value)
+D: .word32 0		; create a 32-bit word with value 0...FOR STORING!
+
+.text			; start of code segment
+Main:			; label indicating start of program, instruction address 0x0000
+	ld r4,s(r0)	; load value s into r4
+	ld r5,i(r0)	; load value i into r5
+	ld r6,N(r0)	; load upper bound N into r6
+
+Loop:
+	dadd r4,r4,r5	; increment s by 1
+	daddi r5,r5,1	; increment i by 1
+	beq r5,r6,End	; branch if i = N
+	bne r5,r6,Loop	; loop again if i != N
+
+End:
+	sd r4,D(r0)	; store r2 to memory address D + r0
+	halt		; end program 
+
 
 
 
