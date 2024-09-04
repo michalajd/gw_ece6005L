@@ -1,0 +1,33 @@
+Sample Program
+Sum.s:
+.data
+A: .word32 10		; create a 32-bit word with value 10
+B: .word32 8		; create a 32-bit word with value 8
+C: .word32 0		; create a 32-bit word with value 0
+
+.text			; start of code segment
+Main:			; label indicating start of program, instruction address 0x0000
+	ld r4,A(r0)	; load value in address A + r0 to register r4
+	ld r5,B(r0)	; load value in address B + r0 to register r5
+	dadd r3,r4,r5	; add r4 and 45, store in r3
+	sd r3,C(r0)	; store r3 to memory address C + r0
+	halt		; end program
+
+
+Practice Problem 1 (A+B+5, A=B=2)
+.data
+A: .word32 2		; create a 32-bit word with value 2
+B: .word32 2		; create a 32-bit word with value 2
+
+.text			; start of code segment
+Main:			; label indicating start of program, instruction address 0x0000
+	ld r4,A(r0)	; load value in address A + r0 to register r4
+	ld r5,B(r0)	; load value in address B + r0 to register r5
+	dadd r3,r4,r5	; add r4 and r5, store in r3
+	dadd r2,r3,5	; add r3 and 5, store in r2
+	sd r2,C(r0)	; store r3 to memory address C + r0
+	halt		; end program
+
+
+
+
