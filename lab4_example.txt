@@ -1,0 +1,145 @@
+.data
+array:		.word 9,8,7,6,5,4,10,23,12,100
+STR1:		.asciiz "before sort the array is: \n"
+STR2:		.asciiz "after sort the array is: \n"
+STR3:		.asciiz "the average of the array is: \n"
+CONTROL:	.word32 0x10000
+DATA:   	.word32 0x10008
+		.space 64	# tells assembler to reserve 64 bytes (16 words)
+sp:		.word32 0	# stack pointer: pointer for swapping
+
+.text
+main:
+	ld r1,CONTROL($zero) 	# get 0x10000 and 0x10008 address
+	ld r2,DATA($zero)	
+	
+	daddi r0,$zero,0
+	daddi r3,r0,STR1     	# output str1
+	daddi r4,r0,4
+	sd r3,0(r2)
+	sd r4,0(r1)		# 4 to control is string
+ 
+	daddi r3,$zero,0
+
+print1:
+	ld r4,array(r3)
+	sd r4,0(r2)         	# The first data of the initial array stored in address 0
+	daddi r5,$zero,2    
+	sd r5,0(r1)
+	daddi r3,r3,8
+	daddi r4,r3,-80      	# output 10 data，each 8 byte，so -80
+	beqz  r4,print_end1
+	j print1
+
+print_end1:  
+	daddi r0,$zero,0
+	daddi r3,r0,STR2  	# output str2
+	daddi r4,r0,4
+	sd r3,0(r2)
+	sd r4,0(r1)
+	
+	daddi $sp,$zero,sp  	# stack pointer
+	daddi r5,$zero,array  	# r5: save the address of array
+	daddi r6,$zero,10  	# r6: save the length of array 
+	jal sort
+
+swap:
+	dsll r6,r6,3 # r6*8
+	dadd r11,r6,r5     	# r11 is the current address of array
+	ld r12,0(r11)
+	ld r13,8(r11)
+	sd r12,8(r11)
+	sd r13,0(r11)
+	jr $ra
+
+
+sort:
+	daddi $sp,$sp,-64
+	sd $ra,0($sp)
+	sd r7,8($sp) 
+	sd r8,16($sp) 
+	sd r9,24($sp) 
+	sd r10,32($sp) 
+	sd r11,40($sp) 
+	sd r12,48($sp)
+	sd r13,56($sp)
+ 
+	dadd r8,r6,$zero  	# length（$zero is a register）
+	daddi r9,$zero,1   	# i=1
+	j mid1
+
+loop1:	
+	daddi r10,$zero,0       # j=0, j is the parameter noting where it is already sorted
+	j mid2
+loop2:
+	dsll r7,r10,3      	# r10*8, or j*8
+	dadd r7,r7,r5    	# r7 is the address of current array
+	ld r11,0(r7)
+	ld r12,8(r7)
+	slt r13,r12,r11 	# If r12<r11, then r13=1
+	beq r13,$zero,NotSwap
+	dadd r6,$zero,r10 	#r6=j
+	jal swap
+
+NotSwap:
+	daddi r10,r10,1  	# j++
+mid2:
+	dadd r3,r9,r10    	# i+j
+	bne r3,r8,loop2  	# i+j!=length, or j<len-i
+	daddi r9,r9,1       	# i++
+mid1:
+	bne r8,r9,loop1 	# i!=len, or i<len
+
+sort_end:
+	ld $ra,0($sp)
+	ld r7,8($sp)
+	ld r8,16($sp)
+	ld r9,24($sp)
+	ld r10,32($sp)
+	ld r11,40($sp) 
+	ld r12,48($sp)
+	ld r13,56($sp)
+	daddi $sp,$sp,64
+	
+	daddi r3,$zero,0
+
+print2:
+	ld r4,array(r3)
+	sd r4,0(r2)     	# The first data of array stored in address 0
+	daddi r5,$zero,2    
+	sd r5,0(r1)
+	daddi r3,r3,8
+	daddi r4,r3,-80 	# output 10 data，each is 8 byte，so -80
+	beqz  r4,print_end2
+	j print2
+
+print_end2:
+	daddi r0,$zero,0
+	daddi r3,r0,STR3  	# output str3
+	daddi r4,r0,4
+	sd r3,0(r2)
+	sd r4,0(r1)
+	
+	daddi $sp,$zero,sp  	# stack pointer
+	daddi r5,$zero,array  	# r5: save the address of array
+	daddi r6,$zero,10  	# r6: save the length of array 
+	daddi r12,$zero,0	# r12: register for storing sum
+	daddi r3,$zero,0	# set r3 back to 0!
+	j avg
+
+avg:
+	ld r4,array(r3)
+	dadd r12,r12,r4		# add r3 to the sum of values
+	daddi r3,r3,8		# add 8 to the array pointer
+	daddi r4,r3,-80
+	beqz r4,print_avg
+	j avg
+
+print_avg:
+	ddiv r13,r12,r6		# divide sum by length
+	sd r13,0(r2)         	# The first data of the initial array stored in address 0
+	daddi r5,$zero,2	# set control register to int
+	sd r5,0(r1)		
+	
+ishalt:
+halt
